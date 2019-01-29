@@ -208,15 +208,9 @@ function createMenu({
       role: 'help',
       submenu: [
         {
-          label: `Built with Nativefier v${nativefierVersion}`,
+          label: 'Artshell',
           click: () => {
-            shell.openExternal('https://github.com/jiahaog/nativefier');
-          },
-        },
-        {
-          label: 'Report an Issue',
-          click: () => {
-            shell.openExternal('https://github.com/jiahaog/nativefier/issues');
+            shell.openExternal('https://www.artshell.net/');
           },
         },
       ],
