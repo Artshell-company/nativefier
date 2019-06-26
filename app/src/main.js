@@ -10,6 +10,14 @@ import createTrayIcon from './components/trayIcon/trayIcon';
 import helpers from './helpers/helpers';
 import inferFlash from './helpers/inferFlash';
 
+const electronSquirrelStartup = require('electron-squirrel-startup');
+
+// Entrypoint for electron-squirrel-startup.
+// See https://github.com/jiahaog/nativefier/pull/744 for sample use case
+if (electronSquirrelStartup) {
+  app.exit();
+}
+
 const { isOSX } = helpers;
 
 const APP_ARGS_FILE_PATH = path.join(__dirname, '..', 'nativefier.json');
@@ -119,21 +127,41 @@ if (appArgs.crashReporter) {
   });
 }
 
-app.on('ready', () => {
-  mainWindow = createMainWindow(appArgs, app.quit, setDockBadge);
-  createTrayIcon(appArgs, mainWindow);
+// quit if singleInstance mode and there's already another instance running
+const shouldQuit = appArgs.singleInstance && !app.requestSingleInstanceLock();
+if (shouldQuit) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (!mainWindow.isVisible()) {
+        // try
+        mainWindow.show();
+      }
+      if (mainWindow.isMinimized()) {
+        // minimized
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    }
+  });
 
-  // Register global shortcuts
-  if (appArgs.globalShortcuts) {
-    appArgs.globalShortcuts.forEach((shortcut) => {
-      globalShortcut.register(shortcut.key, () => {
-        shortcut.inputEvents.forEach((inputEvent) => {
-          mainWindow.webContents.sendInputEvent(inputEvent);
+  app.on('ready', () => {
+    mainWindow = createMainWindow(appArgs, app.quit, setDockBadge);
+    createTrayIcon(appArgs, mainWindow);
+
+    // Register global shortcuts
+    if (appArgs.globalShortcuts) {
+      appArgs.globalShortcuts.forEach((shortcut) => {
+        globalShortcut.register(shortcut.key, () => {
+          shortcut.inputEvents.forEach((inputEvent) => {
+            mainWindow.webContents.sendInputEvent(inputEvent);
+          });
         });
       });
-    });
-  }
-});
+    }
+  });
+}
 
 app.on('new-window-for-tab', () => {
   mainWindow.emit('new-tab');
@@ -152,24 +180,3 @@ app.on('login', (event, webContents, request, authInfo, callback) => {
     createLoginWindow(callback);
   }
 });
-
-if (appArgs.singleInstance) {
-  const shouldQuit = app.makeSingleInstance(() => {
-    // Someone tried to run a second instance, we should focus our window.
-    if (mainWindow) {
-      if (!mainWindow.isVisible()) {
-        // tray
-        mainWindow.show();
-      }
-      if (mainWindow.isMinimized()) {
-        // minimized
-        mainWindow.restore();
-      }
-      mainWindow.focus();
-    }
-  });
-
-  if (shouldQuit) {
-    app.quit();
-  }
-}

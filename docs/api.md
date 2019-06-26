@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
+- [Packaging Squirrel-based installers](#packaging-squirrel-based-installers)
 - [Command Line](#command-line)
     - [Target Url](#target-url)
     - [[dest]](#dest)
@@ -56,6 +57,7 @@
     - [[crash-reporter]](#crash-reporter)
     - [[zoom]](#zoom)
     - [[single-instance]](#single-instance)
+    - [[clear-cache]](#clear-cache)
     - [[tray]](#tray)
     - [[basic-auth-username]](#basic-auth-username)
     - [[processEnvs]](#processenvs)
@@ -67,6 +69,10 @@
     - [[version-string]](#version-string)
     - [[win32metadata]](#win32metadata)
       - [Programmatic API](#programmatic-api)
+
+## Packaging Squirrel-based installers
+
+See [PR #744 - Support packaging nativefier applications into Squirrel-based installers](https://github.com/jiahaog/nativefier/pull/744)
 
 ## Command Line
 
@@ -518,6 +524,14 @@ Sets a default zoom factor to be used when the app is opened, defaults to `1.0`.
 
 Prevents application from being run multiple times. If such an attempt occurs the already running instance is brought to front.
 
+#### [clear-cache]
+
+```
+--clear-cache
+```
+
+Prevents the application from preserving cache between launches.
+
 #### [tray]
 
 ```
@@ -720,6 +734,7 @@ var options = {
     honest: false,
     zoom: 1.0,
     singleInstance: false,
+    clearCache: false,
     fileDownloadOptions: {
       saveAs: true // always show "Save As" dialog
     },
